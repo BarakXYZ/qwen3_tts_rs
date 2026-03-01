@@ -372,7 +372,7 @@ pub fn softmax(a: &MlxArray, axes: &[i32]) -> MlxArray {
             a.ptr,
             axes.as_ptr(),
             axes.len(),
-            false, // precise
+            true, // precise – required for numerically stable sampling
             default_stream(),
         );
     }
