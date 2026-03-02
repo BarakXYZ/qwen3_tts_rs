@@ -159,19 +159,29 @@ download_models() {
     local models_dir="${INSTALL_DIR}/models"
     mkdir -p "$models_dir"
 
-    # Ensure huggingface-cli is available
-    if ! command -v huggingface-cli &>/dev/null; then
-        info "Installing huggingface_hub..."
-        pip install -q huggingface_hub
-    fi
-
     for model in "$CUSTOM_VOICE_MODEL" "$BASE_MODEL"; do
         local model_dir="${models_dir}/${model}"
         if [ -d "$model_dir" ] && [ -n "$(ls -A "$model_dir" 2>/dev/null)" ]; then
             ok "${model} already downloaded, skipping."
         else
             info "Downloading ${model}..."
-            huggingface-cli download "Qwen/${model}" --local-dir "$model_dir"
+            mkdir -p "$model_dir"
+
+            # List files via HuggingFace API and download each one
+            local api_url="https://huggingface.co/api/models/Qwen/${model}"
+            local hf_url="https://huggingface.co/Qwen/${model}/resolve/main"
+            local files
+            files=$(curl -fSL "$api_url" | grep -o '"rfilename":"[^"]*"' | sed 's/"rfilename":"//;s/"//')
+
+            for file in $files; do
+                # Skip markdown and git files
+                case "$file" in
+                    .gitattributes|README.md) continue ;;
+                esac
+                info "  ${file}..."
+                mkdir -p "${model_dir}/$(dirname "$file")"
+                curl -fSL -o "${model_dir}/${file}" "${hf_url}/${file}"
+            done
             ok "${model} downloaded."
         fi
 

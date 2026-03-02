@@ -102,7 +102,7 @@ jobs:
           )
           for model in "${models[@]}"; do
             mkdir -p "tokenizers/${model}"
-            huggingface-cli download "Qwen/${model}" --local-dir "_hf_tmp/${model}"
+            python3 -m huggingface_hub.cli download "Qwen/${model}" --local-dir "_hf_tmp/${model}"
             python3 -c "
           from transformers import AutoTokenizer
           tok = AutoTokenizer.from_pretrained('_hf_tmp/${model}', trust_remote_code=True)
