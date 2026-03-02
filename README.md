@@ -17,58 +17,17 @@ Learn more:
 
 ## Quick Start
 
-### 1. Download the release
-
-Download the latest release for your platform from [GitHub Releases](https://github.com/second-state/qwen3_tts_rs/releases/latest) and extract. Each zip contains the `tts` and `voice_clone` binaries and all required runtime dependencies (libtorch for Linux, mlx.metallib for macOS).
-
-**macOS (Apple Silicon)**
+Run the installer to download binaries, models, and reference audio for your platform:
 
 ```bash
-curl -LO https://github.com/second-state/qwen3_tts_rs/releases/latest/download/qwen3-tts-macos-aarch64.zip
-unzip qwen3-tts-macos-aarch64.zip
-# Contains: qwen3-tts-macos-aarch64/tts, qwen3-tts-macos-aarch64/voice_clone, qwen3-tts-macos-aarch64/mlx.metallib
+curl -sSf https://raw.githubusercontent.com/second-state/qwen3_tts_rs/main/install.sh | bash
 ```
 
-**Linux x86_64**
+The installer detects your OS, CPU, and NVIDIA GPU (if present), then sets up everything in `./qwen3_tts_rs/`. Once complete, generate speech:
 
 ```bash
-curl -LO https://github.com/second-state/qwen3_tts_rs/releases/latest/download/qwen3-tts-linux-x86_64.zip
-unzip qwen3-tts-linux-x86_64.zip
-# Contains: qwen3-tts-linux-x86_64/tts, qwen3-tts-linux-x86_64/voice_clone, qwen3-tts-linux-x86_64/libtorch/
-```
-
-**Linux ARM64**
-
-```bash
-curl -LO https://github.com/second-state/qwen3_tts_rs/releases/latest/download/qwen3-tts-linux-aarch64.zip
-unzip qwen3-tts-linux-aarch64.zip
-# Contains: qwen3-tts-linux-aarch64/tts, qwen3-tts-linux-aarch64/voice_clone, qwen3-tts-linux-aarch64/libtorch/
-```
-
-> **CUDA GPU**: Pre-built releases use CPU libtorch. For CUDA acceleration, download the [CUDA 12.8 libtorch](#prerequisites) and [build from source](#build-from-source).
-
-### 2. Download model weights
-
-```bash
-pip install huggingface_hub transformers
-
-huggingface-cli download Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice --local-dir Qwen3-TTS-12Hz-0.6B-CustomVoice
-
-python3 -c "
-from transformers import AutoTokenizer
-tok = AutoTokenizer.from_pretrained('Qwen3-TTS-12Hz-0.6B-CustomVoice', trust_remote_code=True)
-tok.backend_tokenizer.save('Qwen3-TTS-12Hz-0.6B-CustomVoice/tokenizer.json')
-"
-```
-
-### 3. Generate speech
-
-```bash
-# macOS
-./qwen3-tts-macos-aarch64/tts Qwen3-TTS-12Hz-0.6B-CustomVoice "Hello world, this is a test." Vivian english
-
-# Linux
-./qwen3-tts-linux-x86_64/tts Qwen3-TTS-12Hz-0.6B-CustomVoice "Hello world, this is a test." Vivian english
+cd qwen3_tts_rs
+./tts models/Qwen3-TTS-12Hz-0.6B-CustomVoice "Hello world, this is a test." Vivian english
 ```
 
 Output: `output.wav` (24kHz audio)
