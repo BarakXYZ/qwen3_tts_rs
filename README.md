@@ -30,7 +30,15 @@ cd qwen3_tts_rs
 ./tts models/Qwen3-TTS-12Hz-0.6B-CustomVoice "Hello world, this is a test." Vivian english
 ```
 
-Output: `output.wav` (24kHz audio)
+Clone a voice from reference audio:
+
+```bash
+./voice_clone models/Qwen3-TTS-12Hz-0.6B-Base reference_audio/trump.wav \
+  "Hello, this is a voice cloning test." english \
+  "Angered and appalled millions of Americans across the political spectrum"
+```
+
+Output: `output.wav` / `output_voice_clone.wav` (24kHz audio)
 
 ## Architecture
 
