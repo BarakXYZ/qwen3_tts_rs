@@ -12,59 +12,42 @@
 //! - **VoiceDesign**: Control voice characteristics with natural language
 //! - **Base (VoiceClone)**: Clone voices from reference audio
 //!
+//! Note: the `Qwen3TTSModel` convenience wrapper remains experimental in this
+//! fork and currently returns `Unsupported` for generation entrypoints. The
+//! production inference path used by AlignOS is `inference::TTSInference`.
+//!
 //! ## Quick Start
 //!
 //! ```ignore
-//! use qwen3_tts::{Qwen3TTSModel, Language, Speaker};
+//! use qwen3_tts::inference::TTSInference;
+//! use qwen3_tts::tensor::Device;
 //!
-//! // Load a pretrained model
-//! let model = Qwen3TTSModel::from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice")?;
+//! let inference = TTSInference::new(
+//!     std::path::Path::new("Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice"),
+//!     Device::Cpu,
+//! )?;
 //!
-//! // Generate speech with a predefined speaker
-//! let output = model.generate_custom_voice(
+//! let (waveform, sample_rate) = inference.generate(
 //!     "Hello, welcome to Qwen TTS!",
-//!     Speaker::new("Vivian"),
-//!     Language::English,
-//!     None,
+//!     "Vivian",
+//!     "english",
 //!     None,
 //! )?;
 //!
 //! // Save the output
-//! qwen3_tts::audio::write_wav_file("output.wav", &output.waveforms[0], output.sample_rate)?;
+//! qwen3_tts::audio::write_wav_file("output.wav", &waveform, sample_rate)?;
 //! ```
 //!
-//! ## Voice Cloning
+//! ## Experimental Wrapper
 //!
 //! ```ignore
-//! use qwen3_tts::{Qwen3TTSModel, AudioInput, Language};
-//!
-//! let model = Qwen3TTSModel::from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-Base")?;
-//!
-//! // Clone voice from reference audio
-//! let output = model.generate_voice_clone(
-//!     "This is synthesized in the cloned voice.",
-//!     Language::English,
-//!     AudioInput::from("reference.wav"),
-//!     Some("This is the reference transcript."),
-//!     false, // Use ICL mode
-//!     None,
-//! )?;
-//! ```
-//!
-//! ## Voice Design
-//!
-//! ```ignore
-//! use qwen3_tts::{Qwen3TTSModel, Language, VoiceInstruction};
-//!
+//! use qwen3_tts::Qwen3TTSModel;
 //! let model = Qwen3TTSModel::from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign")?;
 //!
-//! // Design voice with natural language
-//! let output = model.generate_voice_design(
-//!     "Welcome to our service!",
-//!     VoiceInstruction::new("A warm, friendly female voice with moderate speed"),
-//!     Language::English,
-//!     None,
-//! )?;
+//! let error = model
+//!     .generate_voice_design("Welcome", "Warm and friendly", "english", None)
+//!     .unwrap_err();
+//! assert!(matches!(error, qwen3_tts::Qwen3TTSError::Unsupported(_)));
 //! ```
 //!
 //! ## Features
@@ -81,9 +64,9 @@ compile_error!("Features 'tch-backend' and 'mlx' are mutually exclusive");
 #[cfg(not(any(feature = "tch-backend", feature = "mlx")))]
 compile_error!("Either 'tch-backend' or 'mlx' feature must be enabled");
 
-pub mod tensor;
 #[cfg(feature = "mlx")]
 pub mod backend;
+pub mod tensor;
 
 pub mod audio;
 pub mod audio_encoder;

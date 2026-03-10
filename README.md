@@ -8,6 +8,11 @@ A Rust implementation of the Qwen3 Text-to-Speech (TTS) model inference. This pr
 - **tts** generates voice wav files from input text and named voice characters.
 - **voice_clone** generates voice wav files from input text and reference audio files.
 
+The production-ready inference path in this repository is the low-level
+`TTSInference` / CLI stack. The higher-level `Qwen3TTSModel` convenience
+wrapper is still experimental and currently returns explicit `Unsupported`
+errors for generation methods instead of placeholder audio.
+
 Supports two backends: **libtorch** (via the `tch` crate, cross-platform with optional CUDA) and **MLX** (Apple Silicon native via Metal GPU). Loads model weights directly from safetensors files and re-implements the complete neural network forward pass in Rust.
 
 Learn more:

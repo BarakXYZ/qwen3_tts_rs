@@ -8,15 +8,19 @@
 //! - `generate_custom_voice()`: Use predefined speakers
 //! - `generate_voice_design()`: Use natural language voice instructions
 //! - `generate_voice_clone()`: Clone voice from reference audio
+//!
+//! The high-level `Qwen3TTSModel` wrapper is still experimental in this fork.
+//! Production inference should use `inference::TTSInference` directly until the
+//! wrapper methods are wired to the real runtime path end-to-end.
 
 use crate::audio::{load_audio, AudioInput};
 use crate::config::{GenerationConfig, Qwen3TTSConfig, TTSModelType, TokenizerType};
 use crate::error::{Qwen3TTSError, Result};
+use crate::tensor::{DType, Device, Tensor};
 use crate::tokenizer::Qwen3TTSTokenizer;
 use crate::types::{GenerationOutput, Language, Speaker, VoiceClonePromptItem, VoiceInstruction};
 use std::collections::HashSet;
 use std::path::Path;
-use crate::tensor::{DType, Device, Tensor};
 
 /// Builder for generation parameters.
 #[derive(Debug, Clone, Default)]
@@ -379,23 +383,11 @@ impl Qwen3TTSModel {
         // Build instruct text if provided
         let _instruct_text = instruct.map(|i| self.build_instruct_text(i));
 
-        // Placeholder: Actual generation would happen here
-        // For now, return a silent waveform
-        let sample_rate = 24000;
-        let duration_samples = sample_rate * 2; // 2 seconds of silence
-        let waveform = vec![0.0f32; duration_samples as usize];
+        let _ = (texts, speakers, languages, instruct);
 
-        tracing::info!(
-            "Generated custom voice: text='{}', speaker='{}', language='{}'",
-            texts[0],
-            speakers[0].name(),
-            languages[0].as_str()
-        );
-
-        Ok(GenerationOutput {
-            waveforms: vec![waveform],
-            sample_rate,
-        })
+        Err(Qwen3TTSError::Unsupported(
+            "Qwen3TTSModel::generate_custom_voice is not wired to the production inference path yet. Use inference::TTSInference for real synthesis.".to_string(),
+        ))
     }
 
     /// Generate speech using the VoiceDesign model with natural language instructions.
@@ -445,22 +437,11 @@ impl Qwen3TTSModel {
         let _input_text = self.build_assistant_text(&texts[0]);
         let _instruct_text = self.build_instruct_text(instructs[0].text());
 
-        // Placeholder: Actual generation would happen here
-        let sample_rate = 24000;
-        let duration_samples = sample_rate * 2;
-        let waveform = vec![0.0f32; duration_samples as usize];
+        let _ = (texts, instructs, languages);
 
-        tracing::info!(
-            "Generated voice design: text='{}', instruct='{}', language='{}'",
-            texts[0],
-            instructs[0].text(),
-            languages[0].as_str()
-        );
-
-        Ok(GenerationOutput {
-            waveforms: vec![waveform],
-            sample_rate,
-        })
+        Err(Qwen3TTSError::Unsupported(
+            "Qwen3TTSModel::generate_voice_design is not implemented in the production inference path yet. Use inference::TTSInference when VoiceDesign support lands.".to_string(),
+        ))
     }
 
     /// Create a voice clone prompt from reference audio.
@@ -498,26 +479,11 @@ impl Qwen3TTSModel {
         // Load and resample audio
         let samples = load_audio(ref_audio, self.speaker_encoder_sample_rate)?;
 
-        // Placeholder: Extract speaker embedding
-        // In a real implementation, this would use the speaker encoder model
-        let spk_embedding = Tensor::zeros(&[1024], DType::Float32, self.device);
+        let _ = (samples, ref_text, x_vector_only_mode);
 
-        // Placeholder: Encode reference audio to codes
-        // In a real implementation, this would use the speech tokenizer
-        let ref_code = if !x_vector_only_mode {
-            let code_len = samples.len() / 960; // Approximate based on downsample rate
-            Some(Tensor::zeros(&[code_len as i64], DType::Int64, self.device))
-        } else {
-            None
-        };
-
-        Ok(VoiceClonePromptItem {
-            ref_code,
-            ref_spk_embedding: spk_embedding,
-            x_vector_only_mode,
-            icl_mode: !x_vector_only_mode,
-            ref_text: ref_text.map(|s| s.to_string()),
-        })
+        Err(Qwen3TTSError::Unsupported(
+            "Qwen3TTSModel::create_voice_clone_prompt is not wired to the production inference path yet. Use inference::TTSInference for voice cloning.".to_string(),
+        ))
     }
 
     /// Generate speech using voice cloning from reference audio.
@@ -574,22 +540,11 @@ impl Qwen3TTSModel {
         // Build ref text if in ICL mode
         let _ref_text_formatted = prompt.ref_text.as_ref().map(|t| self.build_ref_text(t));
 
-        // Placeholder: Actual generation would happen here
-        let sample_rate = 24000;
-        let duration_samples = sample_rate * 2;
-        let waveform = vec![0.0f32; duration_samples as usize];
+        let _ = (texts, languages, prompt);
 
-        tracing::info!(
-            "Generated voice clone: text='{}', language='{}', icl_mode={}",
-            texts[0],
-            languages[0].as_str(),
-            prompt.icl_mode
-        );
-
-        Ok(GenerationOutput {
-            waveforms: vec![waveform],
-            sample_rate,
-        })
+        Err(Qwen3TTSError::Unsupported(
+            "Qwen3TTSModel::generate_voice_clone is not wired to the production inference path yet. Use inference::TTSInference for real synthesis.".to_string(),
+        ))
     }
 
     /// Generate speech using a pre-created voice clone prompt.
@@ -628,15 +583,11 @@ impl Qwen3TTSModel {
         // Build input text
         let _input_text = self.build_assistant_text(&texts[0]);
 
-        // Placeholder: Actual generation would happen here
-        let sample_rate = 24000;
-        let duration_samples = sample_rate * 2;
-        let waveform = vec![0.0f32; duration_samples as usize];
+        let _ = (texts, languages, _prompt);
 
-        Ok(GenerationOutput {
-            waveforms: vec![waveform],
-            sample_rate,
-        })
+        Err(Qwen3TTSError::Unsupported(
+            "Qwen3TTSModel::generate_voice_clone_with_prompt is not wired to the production inference path yet. Use inference::TTSInference for real synthesis.".to_string(),
+        ))
     }
 }
 
