@@ -31,7 +31,6 @@
 //!     "Hello, welcome to Qwen TTS!",
 //!     "Vivian",
 //!     "english",
-//!     None,
 //! )?;
 //!
 //! // Save the output

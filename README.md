@@ -77,6 +77,7 @@ Key components:
 |-------|-----------|-------------|
 | Qwen3-TTS-12Hz-0.6B-CustomVoice | 0.6B | [Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice) |
 | Qwen3-TTS-12Hz-1.7B-CustomVoice | 1.7B | [Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice) |
+| Qwen3-TTS-12Hz-1.7B-VoiceDesign | 1.7B | [Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign) |
 | Qwen3-TTS-12Hz-0.6B-Base | 0.6B | [Qwen/Qwen3-TTS-12Hz-0.6B-Base](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-Base) |
 
 ## Usage
