@@ -1102,16 +1102,21 @@ impl TTSInference {
 
     fn resolve_speaker_id(&self, speaker: &str) -> Result<i64> {
         let normalized = speaker.trim().to_lowercase();
-        let speaker_map = self.config.talker_config.spk_id.as_ref().ok_or_else(|| {
-            Qwen3TTSError::Inference("This model does not expose preset speakers.".into())
-        })?;
+        let speaker_map = self
+            .config
+            .talker_config
+            .spk_id
+            .as_ref()
+            .ok_or_else(|| {
+                Qwen3TTSError::Unsupported("This model does not expose preset speakers.".into())
+            })?;
 
         speaker_map
             .get(&normalized)
             .copied()
             .map(|speaker_id| speaker_id as i64)
             .ok_or_else(|| {
-                Qwen3TTSError::Inference(format!(
+                Qwen3TTSError::InvalidInput(format!(
                     "Unsupported speaker '{speaker}'. Use one of the model's configured preset speakers."
                 ))
             })
@@ -1129,7 +1134,7 @@ impl TTSInference {
             .codec_language_id
             .as_ref()
             .ok_or_else(|| {
-                Qwen3TTSError::Inference(
+                Qwen3TTSError::Unsupported(
                     "This model does not expose configured language ids.".into(),
                 )
             })?;
@@ -1139,7 +1144,7 @@ impl TTSInference {
             .copied()
             .map(|language_id| Some(language_id as i64))
             .ok_or_else(|| {
-                Qwen3TTSError::Inference(format!(
+                Qwen3TTSError::InvalidInput(format!(
                     "Unsupported language '{language}'. Use one of the model's configured languages or 'Auto'."
                 ))
             })
@@ -1546,7 +1551,7 @@ impl TTSInference {
         let instruct_embeddings = self
             .build_instruction_embeddings(instruct, codec_pad_id)?
             .ok_or_else(|| {
-                Qwen3TTSError::Inference(
+                Qwen3TTSError::InvalidInput(
                     "VoiceDesign requires a non-empty instruction prompt.".into(),
                 )
             })?;
