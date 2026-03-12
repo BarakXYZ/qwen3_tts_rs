@@ -14,8 +14,8 @@
 
 use qwen3_tts::audio::write_wav_file;
 use qwen3_tts::inference::TTSInference;
-use std::path::Path;
 use qwen3_tts::tensor::Device;
+use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();

@@ -102,8 +102,8 @@ fn prepare_patched_mlx_c_source(mlx_c_dir: &Path, out_dir: &Path) -> PathBuf {
     .expect("failed to copy MLX Metal patch script");
 
     let cmake_lists_path = patched_mlx_c_dir.join("CMakeLists.txt");
-    let cmake_lists = fs::read_to_string(&cmake_lists_path)
-        .expect("failed to read copied mlx-c CMakeLists.txt");
+    let cmake_lists =
+        fs::read_to_string(&cmake_lists_path).expect("failed to read copied mlx-c CMakeLists.txt");
     let patched_cmake_lists = cmake_lists.replace(
         "  FetchContent_MakeAvailable(mlx)\nendif()",
         "  FetchContent_MakeAvailable(mlx)\n  if(APPLE)\n    execute_process(\n      COMMAND ${CMAKE_COMMAND}\n              -DMLX_SOURCE_DIR=${mlx_SOURCE_DIR}\n              -P ${CMAKE_CURRENT_LIST_DIR}/cmake/patch_mlx_metal_version.cmake\n      COMMAND_ERROR_IS_FATAL ANY)\n  endif()\nendif()",

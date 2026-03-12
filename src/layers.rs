@@ -6,12 +6,12 @@
 //! This module implements the core neural network layers used by the
 //! TTS model, including attention, MLP, normalization, and vocoder layers.
 
-use std::collections::HashMap;
-use crate::tensor::{Tensor, Device, DType};
-#[cfg(feature = "tch-backend")]
-use tch::nn;
 #[cfg(feature = "mlx")]
 use crate::backend::mlx;
+use crate::tensor::{DType, Device, Tensor};
+use std::collections::HashMap;
+#[cfg(feature = "tch-backend")]
+use tch::nn;
 
 /// RMS Normalization layer.
 pub struct RMSNorm {

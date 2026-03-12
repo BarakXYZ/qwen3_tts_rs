@@ -1102,14 +1102,9 @@ impl TTSInference {
 
     fn resolve_speaker_id(&self, speaker: &str) -> Result<i64> {
         let normalized = speaker.trim().to_lowercase();
-        let speaker_map = self
-            .config
-            .talker_config
-            .spk_id
-            .as_ref()
-            .ok_or_else(|| {
-                Qwen3TTSError::Unsupported("This model does not expose preset speakers.".into())
-            })?;
+        let speaker_map = self.config.talker_config.spk_id.as_ref().ok_or_else(|| {
+            Qwen3TTSError::Unsupported("This model does not expose preset speakers.".into())
+        })?;
 
         speaker_map
             .get(&normalized)

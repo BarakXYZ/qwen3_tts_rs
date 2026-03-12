@@ -222,8 +222,8 @@ impl Tensor {
     }
 
     pub fn arange(start: i64, end: i64, device: Device) -> Self {
-        let t = tch::Tensor::arange(end - start, (tch::Kind::Int64, tch::Device::from(device)))
-            + start;
+        let t =
+            tch::Tensor::arange(end - start, (tch::Kind::Int64, tch::Device::from(device))) + start;
         Tensor::from_tch(t)
     }
 
@@ -619,8 +619,7 @@ impl Tensor {
         let flat = self.inner.view(-1);
         let numel = flat.numel();
         let mut result = vec![0.0f32; numel];
-        flat.to_kind(tch::Kind::Float)
-            .copy_data(&mut result, numel);
+        flat.to_kind(tch::Kind::Float).copy_data(&mut result, numel);
         result
     }
 
@@ -786,10 +785,7 @@ impl Tensor {
         } else {
             dim
         } as i32;
-        Tensor::from_mlx(crate::backend::mlx::ops::expand_dims(
-            &self.inner,
-            &[dim],
-        ))
+        Tensor::from_mlx(crate::backend::mlx::ops::expand_dims(&self.inner, &[dim]))
     }
 
     pub fn squeeze_dim(&self, dim: i64) -> Self {
@@ -803,29 +799,14 @@ impl Tensor {
 
     pub fn transpose(&self, dim0: i64, dim1: i64) -> Self {
         let ndim = self.inner.ndim();
-        let dim0 = if dim0 < 0 {
-            ndim as i64 + dim0
-        } else {
-            dim0
-        } as i32;
-        let dim1 = if dim1 < 0 {
-            ndim as i64 + dim1
-        } else {
-            dim1
-        } as i32;
-        Tensor::from_mlx(crate::backend::mlx::ops::swapaxes(
-            &self.inner,
-            dim0,
-            dim1,
-        ))
+        let dim0 = if dim0 < 0 { ndim as i64 + dim0 } else { dim0 } as i32;
+        let dim1 = if dim1 < 0 { ndim as i64 + dim1 } else { dim1 } as i32;
+        Tensor::from_mlx(crate::backend::mlx::ops::swapaxes(&self.inner, dim0, dim1))
     }
 
     pub fn permute(&self, dims: &[i64]) -> Self {
         let dims_i32: Vec<i32> = dims.iter().map(|&d| d as i32).collect();
-        Tensor::from_mlx(crate::backend::mlx::ops::transpose(
-            &self.inner,
-            &dims_i32,
-        ))
+        Tensor::from_mlx(crate::backend::mlx::ops::transpose(&self.inner, &dims_i32))
     }
 
     pub fn expand(&self, size: &[i64], _implicit: bool) -> Self {
@@ -834,13 +815,7 @@ impl Tensor {
         let shape_i32: Vec<i32> = size
             .iter()
             .enumerate()
-            .map(|(i, &s)| {
-                if s == -1 {
-                    current[i]
-                } else {
-                    s as i32
-                }
-            })
+            .map(|(i, &s)| if s == -1 { current[i] } else { s as i32 })
             .collect();
         Tensor::from_mlx(crate::backend::mlx::ops::broadcast_to(
             &self.inner,
@@ -973,9 +948,16 @@ impl Tensor {
     // -- Reduction --
 
     pub fn mean_dim(&self, dims: &[i64], keepdim: bool) -> Self {
-        let dims_i32: Vec<i32> = dims.iter().map(|&d| {
-            if d < 0 { self.inner.ndim() as i32 + d as i32 } else { d as i32 }
-        }).collect();
+        let dims_i32: Vec<i32> = dims
+            .iter()
+            .map(|&d| {
+                if d < 0 {
+                    self.inner.ndim() as i32 + d as i32
+                } else {
+                    d as i32
+                }
+            })
+            .collect();
         Tensor::from_mlx(crate::backend::mlx::ops::mean(
             &self.inner,
             &dims_i32,
@@ -984,9 +966,16 @@ impl Tensor {
     }
 
     pub fn sum_dim(&self, dims: &[i64], keepdim: bool) -> Self {
-        let dims_i32: Vec<i32> = dims.iter().map(|&d| {
-            if d < 0 { self.inner.ndim() as i32 + d as i32 } else { d as i32 }
-        }).collect();
+        let dims_i32: Vec<i32> = dims
+            .iter()
+            .map(|&d| {
+                if d < 0 {
+                    self.inner.ndim() as i32 + d as i32
+                } else {
+                    d as i32
+                }
+            })
+            .collect();
         Tensor::from_mlx(crate::backend::mlx::ops::sum(
             &self.inner,
             &dims_i32,
@@ -996,9 +985,16 @@ impl Tensor {
 
     pub fn var_dim(&self, dims: &[i64], unbiased: bool, keepdim: bool) -> Self {
         let ddof = if unbiased { 1 } else { 0 };
-        let dims_i32: Vec<i32> = dims.iter().map(|&d| {
-            if d < 0 { self.inner.ndim() as i32 + d as i32 } else { d as i32 }
-        }).collect();
+        let dims_i32: Vec<i32> = dims
+            .iter()
+            .map(|&d| {
+                if d < 0 {
+                    self.inner.ndim() as i32 + d as i32
+                } else {
+                    d as i32
+                }
+            })
+            .collect();
         Tensor::from_mlx(crate::backend::mlx::ops::var(
             &self.inner,
             &dims_i32,
@@ -1067,7 +1063,8 @@ impl Tensor {
         let top_stops = self.inner.shape();
         let top_strides = vec![1i32; ndim];
         top_starts[dim as usize] = n - k as i32;
-        let top_indices = crate::backend::mlx::ops::slice(&sorted_idx, &top_starts, &top_stops, &top_strides);
+        let top_indices =
+            crate::backend::mlx::ops::slice(&sorted_idx, &top_starts, &top_stops, &top_strides);
         (Tensor::from_mlx(values), Tensor::from_mlx(top_indices))
     }
 
@@ -1097,17 +1094,11 @@ impl Tensor {
     }
 
     pub fn triu(&self, diagonal: i64) -> Self {
-        Tensor::from_mlx(crate::backend::mlx::ops::triu(
-            &self.inner,
-            diagonal as i32,
-        ))
+        Tensor::from_mlx(crate::backend::mlx::ops::triu(&self.inner, diagonal as i32))
     }
 
     pub fn tril(&self, diagonal: i64) -> Self {
-        Tensor::from_mlx(crate::backend::mlx::ops::tril(
-            &self.inner,
-            diagonal as i32,
-        ))
+        Tensor::from_mlx(crate::backend::mlx::ops::tril(&self.inner, diagonal as i32))
     }
 
     // -- Comparison --
@@ -1138,7 +1129,7 @@ impl Tensor {
         // PyTorch expects input [N, C_in, L], weight [C_out, C_in, K]
         // We need to transpose input and weight, then transpose output back.
         let input_t = self.transpose(1, 2); // [N, C_in, L] -> [N, L, C_in]
-        // Weight transpose: [C_out, C_in, K] -> [C_out, K, C_in]
+                                            // Weight transpose: [C_out, C_in, K] -> [C_out, K, C_in]
         let weight_t = weight.transpose(1, 2);
         let result = crate::backend::mlx::ops::conv1d(
             &input_t.inner,
@@ -1317,7 +1308,9 @@ impl Tensor {
     }
 
     pub fn to_vec_f32(&self) -> Vec<f32> {
-        let f32_arr = self.inner.astype(crate::backend::mlx::ffi::mlx_dtype::MLX_FLOAT32);
+        let f32_arr = self
+            .inner
+            .astype(crate::backend::mlx::ffi::mlx_dtype::MLX_FLOAT32);
         f32_arr.to_vec_f32()
     }
 
@@ -1335,9 +1328,13 @@ impl std::ops::Add<&Tensor> for &Tensor {
     type Output = Tensor;
     fn add(self, rhs: &Tensor) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner + &rhs.inner) }
+        {
+            Tensor::from_tch(&self.inner + &rhs.inner)
+        }
         #[cfg(feature = "mlx")]
-        { Tensor::from_mlx(crate::backend::mlx::ops::add(&self.inner, &rhs.inner)) }
+        {
+            Tensor::from_mlx(crate::backend::mlx::ops::add(&self.inner, &rhs.inner))
+        }
     }
 }
 
@@ -1367,7 +1364,9 @@ impl std::ops::Add<f64> for &Tensor {
     type Output = Tensor;
     fn add(self, rhs: f64) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner + rhs) }
+        {
+            Tensor::from_tch(&self.inner + rhs)
+        }
         #[cfg(feature = "mlx")]
         {
             let scalar = crate::backend::mlx::array::MlxArray::scalar_f32(rhs as f32);
@@ -1388,9 +1387,13 @@ impl std::ops::Sub<&Tensor> for &Tensor {
     type Output = Tensor;
     fn sub(self, rhs: &Tensor) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner - &rhs.inner) }
+        {
+            Tensor::from_tch(&self.inner - &rhs.inner)
+        }
         #[cfg(feature = "mlx")]
-        { Tensor::from_mlx(crate::backend::mlx::ops::subtract(&self.inner, &rhs.inner)) }
+        {
+            Tensor::from_mlx(crate::backend::mlx::ops::subtract(&self.inner, &rhs.inner))
+        }
     }
 }
 
@@ -1420,9 +1423,13 @@ impl std::ops::Mul<&Tensor> for &Tensor {
     type Output = Tensor;
     fn mul(self, rhs: &Tensor) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner * &rhs.inner) }
+        {
+            Tensor::from_tch(&self.inner * &rhs.inner)
+        }
         #[cfg(feature = "mlx")]
-        { Tensor::from_mlx(crate::backend::mlx::ops::multiply(&self.inner, &rhs.inner)) }
+        {
+            Tensor::from_mlx(crate::backend::mlx::ops::multiply(&self.inner, &rhs.inner))
+        }
     }
 }
 
@@ -1452,7 +1459,9 @@ impl std::ops::Mul<f64> for &Tensor {
     type Output = Tensor;
     fn mul(self, rhs: f64) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner * rhs) }
+        {
+            Tensor::from_tch(&self.inner * rhs)
+        }
         #[cfg(feature = "mlx")]
         {
             let scalar = crate::backend::mlx::array::MlxArray::scalar_f32(rhs as f32);
@@ -1488,9 +1497,13 @@ impl std::ops::Div<&Tensor> for &Tensor {
     type Output = Tensor;
     fn div(self, rhs: &Tensor) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner / &rhs.inner) }
+        {
+            Tensor::from_tch(&self.inner / &rhs.inner)
+        }
         #[cfg(feature = "mlx")]
-        { Tensor::from_mlx(crate::backend::mlx::ops::divide(&self.inner, &rhs.inner)) }
+        {
+            Tensor::from_mlx(crate::backend::mlx::ops::divide(&self.inner, &rhs.inner))
+        }
     }
 }
 
@@ -1520,7 +1533,9 @@ impl std::ops::Div<f64> for &Tensor {
     type Output = Tensor;
     fn div(self, rhs: f64) -> Tensor {
         #[cfg(feature = "tch-backend")]
-        { Tensor::from_tch(&self.inner / rhs) }
+        {
+            Tensor::from_tch(&self.inner / rhs)
+        }
         #[cfg(feature = "mlx")]
         {
             let scalar = crate::backend::mlx::array::MlxArray::scalar_f32(rhs as f32);
